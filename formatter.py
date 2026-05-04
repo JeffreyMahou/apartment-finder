@@ -1,11 +1,19 @@
 import csv
 import json
 import logging
+import sys
 from datetime import datetime
 from typing import List, Dict, Any
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
+
+def safe_print(text):
+    """Print text with graceful Unicode handling"""
+    try:
+        print(text, flush=True)
+    except Exception:
+        pass
 
 
 class ListingFormatter:
@@ -70,37 +78,37 @@ class ListingFormatter:
 
     def print_summary(self, listings: List[Dict[str, Any]], summary: Dict[str, Any]):
         """Print summary to console"""
-        print("\n" + "=" * 60)
-        print("APARTMENT SEARCH RESULTS")
-        print("=" * 60)
-        print(f"Total listings found: {summary['total']}")
+        safe_print("\n" + "=" * 60)
+        safe_print("APARTMENT SEARCH RESULTS")
+        safe_print("=" * 60)
+        safe_print(f"Total listings found: {summary['total']}")
 
         if summary['total'] > 0:
-            print(f"\nListings by source:")
+            safe_print(f"\nListings by source:")
             for source, count in summary.get('by_source', {}).items():
-                print(f"  • {source}: {count}")
+                safe_print(f"  • {source}: {count}")
 
             price_min = summary.get('price_min')
             price_max = summary.get('price_max')
             price_avg = summary.get('price_avg')
 
             if price_min:
-                print(f"\nPrice range: ₪{price_min:,.0f} - ₪{price_max:,.0f}")
-                print(f"Average price: ₪{price_avg:,.0f}")
+                safe_print(f"\nPrice range: ILS {price_min:,.0f} - ILS {price_max:,.0f}")
+                safe_print(f"Average price: ILS {price_avg:,.0f}")
 
-        print("\n" + "=" * 60)
-        print("First 10 listings:")
-        print("=" * 60)
+        safe_print("\n" + "=" * 60)
+        safe_print("First 10 listings:")
+        safe_print("=" * 60)
 
         for i, listing in enumerate(listings[:10], 1):
-            print(f"\n{i}. {listing.get('title', 'N/A')}")
-            print(f"   Price: ₪{listing.get('price', 'N/A')}")
-            print(f"   Rooms: {listing.get('rooms', 'N/A')} | Area: {listing.get('area', 'N/A')} m²")
-            print(f"   Location: {listing.get('address', listing.get('location', 'N/A'))}")
-            print(f"   Source: {listing.get('source', 'N/A')}")
-            print(f"   URL: {listing.get('url', 'N/A')}")
+            safe_print(f"\n{i}. {listing.get('title', 'N/A')}")
+            safe_print(f"   Price: ILS {listing.get('price', 'N/A')}")
+            safe_print(f"   Rooms: {listing.get('rooms', 'N/A')} | Area: {listing.get('area', 'N/A')} m²")
+            safe_print(f"   Location: {listing.get('address', listing.get('location', 'N/A'))}")
+            safe_print(f"   Source: {listing.get('source', 'N/A')}")
+            safe_print(f"   URL: {listing.get('url', 'N/A')}")
 
         if len(listings) > 10:
-            print(f"\n... and {len(listings) - 10} more listings")
+            safe_print(f"\n... and {len(listings) - 10} more listings")
 
-        print("\n" + "=" * 60)
+        safe_print("\n" + "=" * 60)

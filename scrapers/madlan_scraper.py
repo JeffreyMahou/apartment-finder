@@ -1,15 +1,15 @@
-import requests
+from apify_client import ApifyClient
 from typing import List, Dict, Any
 from .base_scraper import BaseScraper
 
 
 class MadlanScraper(BaseScraper):
     APIFY_MADLAN_ACTOR = 'swerve/madlan-scraper'
-    APIFY_API_URL = 'https://api.apify.com/v2'
 
     def __init__(self, api_token: str):
         super().__init__(api_token)
         self.source = 'Madlan'
+        self.client = ApifyClient(api_token)
 
     def fetch_listings(self, location: str, min_price: int, max_price: int,
                       min_rooms: int, max_rooms: int) -> List[Dict[str, Any]]:
@@ -19,31 +19,22 @@ class MadlanScraper(BaseScraper):
 
             input_data = {
                 'dealType': 'rent',
-                'cities': [location],
+                'city': location,
                 'priceMin': min_price,
                 'priceMax': max_price,
                 'roomsMin': min_rooms,
                 'roomsMax': max_rooms,
             }
 
-            url = f'{self.APIFY_API_URL}/acts/{self.APIFY_MADLAN_ACTOR}/run-sync-get-dataset-items'
-            params = {
-                'token': self.api_token
-            }
+            run = self.client.actor(self.APIFY_MADLAN_ACTOR).call(run_input=input_data)
+            raw_listings = self.client.dataset(run['defaultDatasetId']).list_items().items
 
-            response = requests.post(url, json=input_data, params=params, timeout=60)
-            response.raise_for_status()
-
-            raw_listings = response.json()
             standardized = [self.standardize_listing(item) for item in raw_listings]
             valid_listings = [l for l in standardized if self.validate_listing(l)]
 
             self.log_info(f"Found {len(valid_listings)} valid listings (from {len(raw_listings)} total)")
             return valid_listings
 
-        except requests.exceptions.RequestException as e:
-            self.log_error(f"API request failed: {e}")
-            return []
         except Exception as e:
             self.log_error(f"Error fetching listings: {e}")
             return []
