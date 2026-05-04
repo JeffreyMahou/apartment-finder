@@ -35,7 +35,7 @@ class BaseScraper(ABC):
 
     def validate_listing(self, listing: Dict[str, Any]) -> bool:
         """Basic validation of listing data"""
-        required_fields = ['title', 'price', 'location', 'url']
+        required_fields = ['price', 'url']
         return all(listing.get(field) for field in required_fields)
 
     def log_info(self, message: str):

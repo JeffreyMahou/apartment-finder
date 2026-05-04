@@ -6,7 +6,7 @@ logger = logging.getLogger(__name__)
 
 
 class ListingAggregator:
-    def __init__(self, similarity_threshold: float = 0.7):
+    def __init__(self, similarity_threshold: float = 0.95):
         self.similarity_threshold = similarity_threshold
 
     def aggregate(self, *listing_lists: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
